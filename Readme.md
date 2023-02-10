@@ -2,7 +2,7 @@
 This is a web application called "Moodify"! Input an image to have your mood analyzed, and you'll be directed to the perfect spotify playlist to match your mood!
 
 
-## Setup & Installtion
+## Setup & Installation
 
 Please have the latest version of Python installed.
 
