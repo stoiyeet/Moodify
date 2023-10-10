@@ -5,8 +5,9 @@ import os
 import base64
 # from requests import post, get
 import pprint
+import subprocess,time,os
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from app import songFinder
+from app import SongFinder
 
 # load_dotenv()
 
@@ -16,22 +17,35 @@ apps = Blueprint('apps', __name__)
 
 
 @apps.route('/', methods=['GET', 'POST'])
-def apps():
+def find_song():
+    pl_url = "empty"
+    mood = "mid"
+    uploaded = False
     if request.method == 'POST':
         file = request.form.get('myFile')
-        # txt = request.form.get('faker')
-        # print(file.endswith(".jpg"))
-        if file.endswith(".jpg"):
-            sf = songFinder(file)
+        print(type(file))
+        if len(file)==0:
+            subprocess.run('start microsoft.windows.camera:', shell=True)
+            time.sleep(5)
+            subprocess.run('Taskkill /IM WindowsCamera.exe /F', shell=True)
+        if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
+            # sf = songFinder(file)
+            sf = SongFinder()
             token = sf.get_token()
-            mood = sf.get_mood(file)
+            # mood = sf.get_mood(file)
+            mood = sf.get_mood("data:image/jpeg;base64,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")
             print("Mood: ", mood)
             json_result = sf.search_for_playlist(token, mood)
             playlist = sf.get_right_playlist(json_result, mood)
             print(playlist['name'])
+            pl_url = sf.get_url(playlist)
+            uploaded = True
+
+
         # face_analysis = DeepFace.analyze(img_path=file)
         # dominant_emotion = face_analysis['dominant_emotion']
         # print(face_analysis)
         # print(dominant_emotion)
         # return render_template("upload-Page.html", d=dominant_emotion)
-    return render_template("upload-Page.html")
+    # return redirect(url_for(pl_url))
+    return render_template("upload-Page.html", link=pl_url,mood=mood, upload = uploaded)
