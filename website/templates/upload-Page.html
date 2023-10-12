@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet">
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
     <style>
         h1,h2 {
             font-family: 'Comic Sans', sans-serif;
@@ -15,6 +16,10 @@
             color: whitesmoke;
             font-size: 60px;
 
+        }
+
+        #camera {
+            transform: scaleX(-1);
         }
 
 
@@ -62,16 +67,29 @@
 <body>
     <i class="fa fa-spotify" style="font-size:100px;color:#1DB954"></i>
     <h1>Upload Your Inspiration Image </h1>
-    <form method="POST" id=input>
+    <form method="POST" id="input" enctype="multipart/form-data">
+        <!-- Upload File -->
         <label for="myFile">Choose File</label>
         <input type="file" id="myFile" name="myFile" class="inputFile" hidden>
         <button type="submit" id="submit" class="inputFile">Submit</button>
-        <button type="submit" id="camera" class="inputFile">Take a Picture</button>
+        <button id="startCameraBtn" type="button">Open Camera</button>
+        <video id="camera" autoplay playsinline style="display:none; width:320px; height:240px;"></video>
+        <button id="captureBtn" type="button" style="display:none;">Capture Photo</button>
+        <!-- Add inside your form -->
+        <input type="hidden" id="camera_image" name="camera_image">
+        <canvas id="snapshot" style="display:none;"></canvas>
+        <div id="preview" style="display:none;">
+        <h3>Preview:</h3>
+        <img id="previewImg" style="max-width: 100%; border: 1px solid white;">
+        </div>
+
+
     </form>
+
 
     {% if upload == True%}
     <h2>Your mood is {{mood}}!</h2>
-    <a rel="stylesheet" href="{{link}}"><h2>Click Here to find your Playlist!</h2></a>
+    <a href="{{link}}"><h2>Click Here to find your Playlist!</h2></a>
     {%endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %} {% if

@@ -4,7 +4,6 @@ import json
 import os
 import base64
 from requests import post, get
-import pprint
 import re
 
 load_dotenv()
@@ -45,32 +44,44 @@ class SongFinder:
         return json_result['playlists']
 
 
-    def get_right_playlist(self, top5, mood):
-        for pl in top5['items']:
-            if re.search(f'^.*{mood}.* Mix$'.lower(), pl['name'].lower()): # Find matching playlist name
+    def get_right_playlist(self, playlists, mood):
+        """Find the best matching playlist for the mood"""
+        # First try to find an exact match with the mood name
+        for pl in playlists['items']:
+            if pl and mood.lower() in pl['name'].lower():
                 return pl
-        return pl
+                
+        # If no exact match, return the first playlist
+        if playlists['items']:
+            return playlists['items'][0]
+        return None
 
     def get_url(self, pl_info):
         return pl_info['external_urls']['spotify']
 
 
     def get_mood(self, img_path) -> str:
-        face_analysis = DeepFace.analyze(img_path=img_path)
-        dominant_emotion = face_analysis['dominant_emotion']
-        # print(face_analysis)
-        # print('dominant emotion: ',dominant_emotion)
-        return dominant_emotion
+        """Analyze the image for dominant emotion using DeepFace."""
+        try:
+            face_analysis = DeepFace.analyze(img_path=img_path, actions=['emotion'])  # Optimized: Specify actions for efficiency
+            if not face_analysis:
+                raise ValueError("No face detected in the image.")
+            dominant_emotion = face_analysis[0]['dominant_emotion']
+            print(f"Image path: {img_path}, Dominant emotion: {dominant_emotion}")
+            return dominant_emotion
+        except Exception as e:
+            print(f"Error in mood detection: {e}")
+            return "neutral"  # Fallback to avoid crashes; can be customized
 
 
 def main():
     sf = SongFinder()
     token = sf.get_token()
     # img_path = "images/likeAnimals.jpg"
-    img_path = "https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8aHVtYW4lMjBmYWNlfGVufDB8fDB8fA%3D%3D&w=1000&q=80"
+    img_path = "images/ashisw.jpg"
     mood = sf.get_mood(img_path)
 
-    print('mood: ', mood)
+    print('mood of mine: ', mood)
 
     json_result = sf.search_for_playlist(token, mood)
     # print('playlist info: \n')
